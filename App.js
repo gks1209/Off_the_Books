@@ -21,6 +21,7 @@ import {
   Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Updates from 'expo-updates';
 
 const { width } = Dimensions.get('window');
 
@@ -1187,12 +1188,52 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [ready, setReady] = useState(false);
 
+  // EAS Update 실시간 업데이트 감지 및 즉시 적용 제안
+  const { isUpdatePending } = Updates.useUpdates();
+
+  useEffect(() => {
+    if (isUpdatePending) {
+      Alert.alert(
+        '✨ 업데이트 완료',
+        '새로운 버전의 앱이 다운로드되었습니다. 지금 재시작하여 적용하시겠습니까?',
+        [
+          { text: '나중에', style: 'cancel' },
+          { 
+            text: '지금 적용', 
+            style: 'default',
+            onPress: () => Updates.reloadAsync() 
+          }
+        ]
+      );
+    }
+  }, [isUpdatePending]);
+
   // 로드
   useEffect(() => {
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) setItems(JSON.parse(raw));
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            // 앱 업데이트 시 기존 데이터의 필드가 누락되지 않도록 안전하게 하이드레이션 진행
+            const hydrated = parsed.map(item => ({
+              id: item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+              name: item.name || '',
+              category: item.category || '기타',
+              status: item.status || 'selling',
+              buyPrice: item.buyPrice || '',
+              buyCurrency: item.buyCurrency || 'KRW',
+              soldPrice: item.soldPrice || '',
+              soldCurrency: item.soldCurrency || 'KRW',
+              isReceived: item.isReceived !== undefined ? item.isReceived : true,
+              ...item
+            }));
+            setItems(hydrated);
+          } else {
+            setItems([]);
+          }
+        }
       } catch (e) {
         console.warn('로드 실패', e);
       } finally {

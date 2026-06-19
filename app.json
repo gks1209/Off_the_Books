@@ -3,6 +3,10 @@
     "name": "Off_the_Books",
     "slug": "Off_the_Books",
     "version": "1.0.0",
+    "owner": "treewhy",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
