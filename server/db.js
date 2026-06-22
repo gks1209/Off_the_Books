@@ -8,6 +8,7 @@ const poolConfig = process.env.DATABASE_URL
       ssl: {
         rejectUnauthorized: false, // Required for cloud databases like Neon/Supabase
       },
+      family: 4, // Force IPv4 to prevent ENETUNREACH on IPv6-unsupported networks
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000,
@@ -18,6 +19,7 @@ const poolConfig = process.env.DATABASE_URL
       host: process.env.DB_HOST,
       port: process.env.DB_PORT,
       database: process.env.DB_NAME,
+      family: 4, // Force IPv4
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000,
