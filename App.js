@@ -26,6 +26,15 @@ import * as Updates from 'expo-updates';
 const { width } = Dimensions.get('window');
 
 // ──────────────────────────────────────────────
+//  백엔드 API 설정
+// ──────────────────────────────────────────────
+//  - iOS 시뮬레이터: 'http://localhost:5000'
+//  - Android 에뮬레이터: 'http://10.0.2.2:5000'
+//  - 실기기 테스트: 본인 컴퓨터의 로컬 IP (예: 'http://192.168.0.X:5000')
+const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
+
+
+// ──────────────────────────────────────────────
 //  색상 토큰
 // ──────────────────────────────────────────────
 const C = {
@@ -1212,54 +1221,95 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            // 앱 업데이트 시 기존 데이터의 필드가 누락되지 않도록 안전하게 하이드레이션 진행
-            const hydrated = parsed.map(item => ({
-              id: item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-              name: item.name || '',
-              category: item.category || '기타',
-              status: item.status || 'selling',
-              buyPrice: item.buyPrice || '',
-              buyCurrency: item.buyCurrency || 'KRW',
-              soldPrice: item.soldPrice || '',
-              soldCurrency: item.soldCurrency || 'KRW',
-              isReceived: item.isReceived !== undefined ? item.isReceived : true,
-              ...item
-            }));
-            setItems(hydrated);
-          } else {
-            setItems([]);
-          }
+        const response = await fetch(`${API_URL}/api/items`);
+        if (!response.ok) throw new Error('API server returned error');
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setItems(data);
         }
       } catch (e) {
-        console.warn('로드 실패', e);
+        console.warn('백엔드 데이터 로드 실패, 로컬 저장소 시도합니다...', e);
+        try {
+          const raw = await AsyncStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              const hydrated = parsed.map(item => ({
+                id: item.id || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                name: item.name || '',
+                category: item.category || '기타',
+                status: item.status || 'selling',
+                buyPrice: item.buyPrice || '',
+                buyCurrency: item.buyCurrency || 'KRW',
+                soldPrice: item.soldPrice || '',
+                soldCurrency: item.soldCurrency || 'KRW',
+                isReceived: item.isReceived !== undefined ? item.isReceived : true,
+                ...item
+              }));
+              setItems(hydrated);
+            }
+          }
+        } catch (localErr) {
+          console.warn('로컬 로드 실패', localErr);
+        }
       } finally {
         setReady(true);
       }
     })();
   }, []);
 
-  // 저장 (items 변경 시)
+  // 저장 (items 변경 시 로컬 백업)
   useEffect(() => {
     if (!ready) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items)).catch(console.warn);
   }, [items, ready]);
 
   const addItem = useCallback(async (item) => {
-    setItems((prev) => [item, ...prev]);
+    try {
+      const response = await fetch(`${API_URL}/api/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item),
+      });
+      if (!response.ok) throw new Error('Failed to add item to backend');
+      const savedItem = await response.json();
+      setItems((prev) => [savedItem, ...prev]);
+    } catch (e) {
+      console.warn('백엔드 추가 실패, 로컬 상태만 우선 반영합니다.', e);
+      setItems((prev) => [item, ...prev]);
+    }
     setActiveTab('inventory');
   }, [setActiveTab]);
 
   const updateItem = useCallback(async (updated) => {
-    setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+    try {
+      const response = await fetch(`${API_URL}/api/items/${updated.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      if (!response.ok) throw new Error('Failed to update item on backend');
+      const savedItem = await response.json();
+      setItems((prev) => prev.map((i) => (i.id === savedItem.id ? savedItem : i)));
+    } catch (e) {
+      console.warn('백엔드 업데이트 실패, 로컬 상태만 우선 반영합니다.', e);
+      setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+    }
   }, []);
 
   const deleteItem = useCallback(async (id) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+    try {
+      const response = await fetch(`${API_URL}/api/items/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete item on backend');
+      setItems((prev) => prev.filter((i) => i.id !== id));
+    } catch (e) {
+      console.warn('백엔드 삭제 실패, 로컬 상태만 우선 반영합니다.', e);
+      setItems((prev) => prev.filter((i) => i.id !== id));
+    }
   }, []);
+
 
   if (!ready) {
     return (
