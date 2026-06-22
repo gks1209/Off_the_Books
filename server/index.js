@@ -1,3 +1,7 @@
+const dns = require('dns');
+// Enforce resolving IPv4 first to prevent ENETUNREACH errors on networks without IPv6 routing support.
+dns.setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
