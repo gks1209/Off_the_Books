@@ -12,7 +12,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "y",
+      "bundleIdentifier": "com.treewhy.offthebooks",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
