@@ -31,7 +31,8 @@ const { width } = Dimensions.get('window');
 //  - iOS 시뮬레이터: 'http://localhost:5000'
 //  - Android 에뮬레이터: 'http://10.0.2.2:5000'
 //  - 실기기 테스트: 본인 컴퓨터의 로컬 IP (예: 'http://192.168.0.X:5000')
-const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
+//const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
+const API_URL = 'https://off-the-books-api.onrender.com';
 
 
 // ──────────────────────────────────────────────
@@ -1207,10 +1208,10 @@ export default function App() {
         '새로운 버전의 앱이 다운로드되었습니다. 지금 재시작하여 적용하시겠습니까?',
         [
           { text: '나중에', style: 'cancel' },
-          { 
-            text: '지금 적용', 
+          {
+            text: '지금 적용',
             style: 'default',
-            onPress: () => Updates.reloadAsync() 
+            onPress: () => Updates.reloadAsync()
           }
         ]
       );
