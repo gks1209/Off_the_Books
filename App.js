@@ -17,6 +17,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import C from './src/theme/colors';
 import { useItemStore } from './src/store/useItemStore';
 import RootNavigator from './src/navigation/navigation';
+import syncManager from './src/utils/syncManager';
 
 // ──────────────────────────────────────────────
 //  App 루트
@@ -49,6 +50,12 @@ export default function App() {
   useEffect(() => {
     loadItems();
   }, [loadItems]);
+
+  // 오프라인 동기화 매니저 초기화 및 소멸 처리
+  useEffect(() => {
+    syncManager.init(useItemStore);
+    return () => syncManager.destroy();
+  }, []);
 
   if (!ready) {
     return (

@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import NetInfo from '@react-native-community/netinfo';
 import { apiClient } from '../services/api';
+import syncManager from '../utils/syncManager';
 
 const STORAGE_KEY = '@off_the_books_items_v2';
 
@@ -134,16 +136,31 @@ export const useItemStore = create((set, get) => ({
   // Add Item
   addItem: async (item) => {
     let savedItem = item;
+    let isConnected = false;
+
     try {
-      const response = await apiClient('/api/items', {
-        method: 'POST',
-        body: JSON.stringify(item),
-      });
-      if (response && response.id) {
-        savedItem = response;
-      }
+      const netState = await NetInfo.fetch();
+      isConnected = !!netState.isConnected;
     } catch (e) {
-      console.warn('Backend add failed, applying local changes only.', e);
+      console.warn('Failed to fetch network state', e);
+    }
+
+    if (isConnected) {
+      try {
+        const response = await apiClient('/api/items', {
+          method: 'POST',
+          body: JSON.stringify(item),
+        });
+        if (response && response.id) {
+          savedItem = response;
+        }
+      } catch (e) {
+        console.warn('API add failed, queueing mutation offline...', e.message);
+        await syncManager.enqueue('CREATE', item.id, item);
+      }
+    } else {
+      console.log('App is offline. Queueing CREATE mutation...');
+      await syncManager.enqueue('CREATE', item.id, item);
     }
 
     const newItems = [savedItem, ...get().items];
@@ -154,16 +171,31 @@ export const useItemStore = create((set, get) => ({
   // Update Item
   updateItem: async (updated) => {
     let savedItem = updated;
+    let isConnected = false;
+
     try {
-      const response = await apiClient(`/api/items/${updated.id}`, {
-        method: 'PUT',
-        body: JSON.stringify(updated),
-      });
-      if (response && response.id) {
-        savedItem = response;
-      }
+      const netState = await NetInfo.fetch();
+      isConnected = !!netState.isConnected;
     } catch (e) {
-      console.warn('Backend update failed, applying local changes only.', e);
+      console.warn('Failed to fetch network state', e);
+    }
+
+    if (isConnected) {
+      try {
+        const response = await apiClient(`/api/items/${updated.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(updated),
+        });
+        if (response && response.id) {
+          savedItem = response;
+        }
+      } catch (e) {
+        console.warn('API update failed, queueing mutation offline...', e.message);
+        await syncManager.enqueue('UPDATE', updated.id, updated);
+      }
+    } else {
+      console.log('App is offline. Queueing UPDATE mutation...');
+      await syncManager.enqueue('UPDATE', updated.id, updated);
     }
 
     const newItems = get().items.map((i) => (i.id === updated.id ? savedItem : i));
@@ -173,12 +205,27 @@ export const useItemStore = create((set, get) => ({
 
   // Delete Item
   deleteItem: async (id) => {
+    let isConnected = false;
+
     try {
-      await apiClient(`/api/items/${id}`, {
-        method: 'DELETE',
-      });
+      const netState = await NetInfo.fetch();
+      isConnected = !!netState.isConnected;
     } catch (e) {
-      console.warn('Backend delete failed, applying local changes only.', e);
+      console.warn('Failed to fetch network state', e);
+    }
+
+    if (isConnected) {
+      try {
+        await apiClient(`/api/items/${id}`, {
+          method: 'DELETE',
+        });
+      } catch (e) {
+        console.warn('API delete failed, queueing mutation offline...', e.message);
+        await syncManager.enqueue('DELETE', id);
+      }
+    } else {
+      console.log('App is offline. Queueing DELETE mutation...');
+      await syncManager.enqueue('DELETE', id);
     }
 
     const newItems = get().items.filter((i) => i.id !== id);
