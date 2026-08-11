@@ -3,7 +3,7 @@ import { View, TextInput, StyleSheet } from 'react-native';
 import Label from './Label';
 import C from '../theme/colors';
 
-export const Field = ({ label, value, onChangeText, placeholder, keyboardType, multiline }) => (
+export const Field = ({ label, value, onChangeText, placeholder, keyboardType, multiline, ...rest }) => (
   <View style={styles.fieldWrap}>
     {label ? <Label>{label}</Label> : null}
     <TextInput
@@ -14,6 +14,7 @@ export const Field = ({ label, value, onChangeText, placeholder, keyboardType, m
       placeholderTextColor={C.textMuted}
       keyboardType={keyboardType || 'default'}
       multiline={multiline}
+      {...rest}
     />
   </View>
 );

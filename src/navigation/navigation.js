@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { Text, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import C from '../theme/colors';
 import { useItemStore } from '../store/useItemStore';
 
 // Screens
+import AuthScreen from '../screens/AuthScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import AddItemScreen from '../screens/AddItemScreen';
 import InventoryScreen from '../screens/InventoryScreen';
@@ -13,24 +14,6 @@ import SoldScreen from '../screens/SoldScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
-
-// Temporary Mock Auth Screen (will be replaced with AuthScreen in Step 3)
-function MockAuthScreen() {
-  const setToken = useItemStore((state) => state.setToken);
-  return (
-    <View style={styles.mockAuth}>
-      <Text style={styles.mockAuthTitle}>📖 Off the Books</Text>
-      <Text style={styles.mockAuthSubtitle}>임시 로그인 페이지 (Step 2)</Text>
-      <TouchableOpacity
-        style={styles.mockAuthBtn}
-        onPress={() => setToken('mock-token')}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.mockAuthBtnText}>로그인하기 (Mock)</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 // Main Bottom Tab Navigator
 function MainTabNavigator() {
@@ -78,44 +61,10 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {token === null ? (
-        <Stack.Screen name="Auth" component={MockAuthScreen} />
+        <Stack.Screen name="Auth" component={AuthScreen} />
       ) : (
         <Stack.Screen name="Main" component={MainTabNavigator} />
       )}
     </Stack.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  mockAuth: {
-    flex: 1,
-    backgroundColor: C.bg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  mockAuthTitle: {
-    color: C.accent,
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  mockAuthSubtitle: {
-    color: C.textSec,
-    fontSize: 14,
-    marginBottom: 32,
-  },
-  mockAuthBtn: {
-    backgroundColor: C.accent,
-    borderRadius: 14,
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    alignItems: 'center',
-  },
-  mockAuthBtnText: {
-    color: C.bg,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-});

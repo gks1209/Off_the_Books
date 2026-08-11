@@ -1,3 +1,11 @@
+-- users table creation
+CREATE TABLE IF NOT EXISTS users (
+  "id" SERIAL PRIMARY KEY,
+  "email" VARCHAR(255) UNIQUE NOT NULL,
+  "password" VARCHAR(255) NOT NULL,
+  "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- items table creation with camelCase column names
 CREATE TABLE IF NOT EXISTS items (
   "id" VARCHAR(255) PRIMARY KEY,
@@ -25,5 +33,6 @@ CREATE TABLE IF NOT EXISTS items (
   "deliveryAddr" TEXT,
   "deliveryPhone" VARCHAR(100),
   "trackingNum" VARCHAR(100),
+  "userId" INTEGER REFERENCES users(id) ON DELETE CASCADE,
   "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

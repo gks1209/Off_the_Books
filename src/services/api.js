@@ -1,3 +1,5 @@
+import * as SecureStore from 'expo-secure-store';
+
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://off-the-books-api.onrender.com';
 
 /**
@@ -13,7 +15,15 @@ export const apiClient = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  // Dynamic token attachment will be added here in Step 3.
+  // Load JWT token from SecureStore and append to headers
+  try {
+    const token = await SecureStore.getItemAsync('user_jwt');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  } catch (error) {
+    console.warn('Failed to retrieve JWT token from secure store', error);
+  }
 
   const response = await fetch(url, {
     ...options,

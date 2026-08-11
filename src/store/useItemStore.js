@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { apiClient } from '../services/api';
 
 const STORAGE_KEY = '@off_the_books_items_v2';
@@ -7,12 +8,10 @@ const STORAGE_KEY = '@off_the_books_items_v2';
 export const useItemStore = create((set, get) => ({
   items: [],
   ready: false,
-  token: null, // Pre-declared for Step 2 conditional navigation
-  activeTab: 'dashboard',
+  token: null,
 
   setReady: (ready) => set({ ready }),
   setToken: (token) => set({ token }),
-  setActiveTab: (activeTab) => set({ activeTab }),
   setItems: (items) => {
     set({ items });
     get().saveToLocal(items);
@@ -27,8 +26,75 @@ export const useItemStore = create((set, get) => ({
     }
   },
 
+  // Authentication Actions
+  login: async (email, password) => {
+    try {
+      const response = await apiClient('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      if (response && response.token) {
+        await SecureStore.setItemAsync('user_jwt', response.token);
+        set({ token: response.token });
+        await get().loadItems();
+        return { success: true };
+      }
+      return { success: false, error: 'Token not returned from server' };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  },
+
+  register: async (email, password) => {
+    try {
+      const response = await apiClient('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      if (response && response.token) {
+        await SecureStore.setItemAsync('user_jwt', response.token);
+        set({ token: response.token });
+        await get().loadItems();
+        return { success: true };
+      }
+      return { success: false, error: 'Registration succeeded, but token not returned' };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  },
+
+  logout: async () => {
+    try {
+      await SecureStore.deleteItemAsync('user_jwt');
+      set({ token: null, items: [] });
+      await AsyncStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.warn('Failed to clear session during logout', e);
+    }
+  },
+
   // Load items from API with AsyncStorage fallback
   loadItems: async () => {
+    // 1. Session Hydration: Check if token exists in SecureStore on startup
+    let activeToken = get().token;
+    if (!activeToken) {
+      try {
+        activeToken = await SecureStore.getItemAsync('user_jwt');
+        if (activeToken) {
+          set({ token: activeToken });
+        } else {
+          // No token stored, stop loading. App will redirect to Auth screen.
+          set({ ready: true });
+          return;
+        }
+      } catch (e) {
+        console.warn('No token in secure store, loading defaults', e.message);
+        set({ ready: true });
+        return;
+      }
+    }
+
+    // 2. Fetch items from backend
     try {
       const data = await apiClient('/api/items');
       if (Array.isArray(data)) {
@@ -81,7 +147,7 @@ export const useItemStore = create((set, get) => ({
     }
 
     const newItems = [savedItem, ...get().items];
-    set({ items: newItems, activeTab: 'inventory' });
+    set({ items: newItems });
     await get().saveToLocal(newItems);
   },
 

@@ -10,6 +10,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import C from '../theme/colors';
 import {
   fmt,
@@ -32,6 +33,7 @@ const BUY_FROM_OPTIONS = ['번개장터', '후르츠패밀리', 'ebay', '메루�
 
 export function AddItemScreen() {
   const addItem = useItemStore((state) => state.addItem);
+  const navigation = useNavigation();
 
   const blank = {
     buyDate: todayStr(),
@@ -73,6 +75,7 @@ export function AddItemScreen() {
     };
     await addItem(newItem);
     setForm(blank);
+    navigation.navigate('Inventory');
     Alert.alert('✅', `"${form.name}" 등록 완료!`);
   };
 
