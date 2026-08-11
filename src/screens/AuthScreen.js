@@ -23,6 +23,7 @@ export function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleAuth = async () => {
@@ -32,6 +33,18 @@ export function AuthScreen() {
     if (!trimmedEmail || !trimmedPassword) {
       Alert.alert('⚠️', '이메일과 비밀번호를 모두 입력해주세요.');
       return;
+    }
+
+    if (!isLogin) {
+      const trimmedConfirmPassword = confirmPassword.trim();
+      if (!trimmedConfirmPassword) {
+        Alert.alert('⚠️', '비밀번호 확인을 입력해주세요.');
+        return;
+      }
+      if (trimmedPassword !== trimmedConfirmPassword) {
+        Alert.alert('⚠️', '비밀번호가 일치하지 않습니다.');
+        return;
+      }
     }
 
     setLoading(true);
@@ -48,6 +61,11 @@ export function AuthScreen() {
     if (result && !result.success) {
       Alert.alert('인증 실패', result.error || '이메일 또는 비밀번호가 올바르지 않습니다.');
     }
+  };
+
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setConfirmPassword('');
   };
 
   return (
@@ -86,6 +104,18 @@ export function AuthScreen() {
               autoCorrect={false}
             />
 
+            {!isLogin && (
+              <Field
+                label="비밀번호 확인"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="비밀번호를 다시 한번 입력해주세요"
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            )}
+
             {loading ? (
               <ActivityIndicator size="large" color={C.accent} style={{ marginVertical: 15 }} />
             ) : (
@@ -99,7 +129,7 @@ export function AuthScreen() {
 
             <TouchableOpacity
               style={styles.toggleBtn}
-              onPress={() => setIsLogin(!isLogin)}
+              onPress={toggleMode}
               disabled={loading}
               activeOpacity={0.7}
             >

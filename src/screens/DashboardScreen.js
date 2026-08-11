@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
   ScrollView,
   SafeAreaView,
+  TouchableOpacity,
   StyleSheet,
 } from 'react-native';
 import C from '../theme/colors';
@@ -14,9 +15,33 @@ export function DashboardScreen() {
   const items = useItemStore((state) => state.items);
   const exchangeRate = useItemStore((state) => state.exchangeRate);
 
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+
+  const year = selectedDate.getFullYear();
+  const month = selectedDate.getMonth(); // 0-11
+
+  const handlePrevMonth = () => {
+    setSelectedDate((prev) => {
+      const next = new Date(prev);
+      next.setMonth(prev.getMonth() - 1);
+      return next;
+    });
+  };
+
+  const handleNextMonth = () => {
+    setSelectedDate((prev) => {
+      const next = new Date(prev);
+      next.setMonth(prev.getMonth() + 1);
+      return next;
+    });
+  };
+
   const stats = useMemo(() => {
     const soldThisMonth = items.filter(
-      (i) => i.status === 'sold' && isSameMonth(i.soldDate)
+      (i) => i.status === 'sold' && isSameMonth(i.soldDate, year, month)
     );
     const totalRevenue = soldThisMonth.reduce(
       (a, i) => a + toKRW(i.soldPrice, i.soldCurrency || 'KRW', exchangeRate), 0
@@ -27,10 +52,9 @@ export function DashboardScreen() {
     const unsold = items.filter((i) => i.status === 'selling');
     const inventoryValue = unsold.reduce((a, i) => a + calcCostKRW(i, exchangeRate), 0);
     return { totalRevenue, netProfit, inventoryValue, unsoldCount: unsold.length, soldCount: soldThisMonth.length };
-  }, [items, exchangeRate]);
+  }, [items, exchangeRate, year, month]);
 
-  const now = new Date();
-  const monthLabel = `${now.getFullYear()}년 ${now.getMonth() + 1}월`;
+  const monthLabel = `${year}년 ${month + 1}월`;
 
   const StatCard = ({ emoji, label, value, color }) => (
     <View style={[styles.statCard, { borderColor: color + '55' }]}>
@@ -51,12 +75,20 @@ export function DashboardScreen() {
         {/* 헤더 */}
         <View style={styles.dashHeader}>
           <Text style={styles.dashBrand}>📖 Off the Books</Text>
-          <Text style={styles.dashMonth}>{monthLabel} 리포트</Text>
+          <View style={styles.monthSelectorRow}>
+            <TouchableOpacity onPress={handlePrevMonth} style={styles.arrowBtn} activeOpacity={0.7}>
+              <Text style={styles.arrowText}>‹</Text>
+            </TouchableOpacity>
+            <Text style={styles.dashMonth}>{monthLabel} 리포트</Text>
+            <TouchableOpacity onPress={handleNextMonth} style={styles.arrowBtn} activeOpacity={0.7}>
+              <Text style={styles.arrowText}>›</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* 통계 카드 3개 */}
-        <StatCard emoji="💰" label="이번 달 총 매출" value={stats.totalRevenue} color={C.gold} />
-        <StatCard emoji="📈" label="이번 달 순이익" value={stats.netProfit} color={C.green} />
+        <StatCard emoji="💰" label={`${month + 1}월 총 매출`} value={stats.totalRevenue} color={C.gold} />
+        <StatCard emoji="📈" label={`${month + 1}월 순이익`} value={stats.netProfit} color={C.green} />
         <StatCard emoji="📦" label="현재 재고 총 가치" value={stats.inventoryValue} color={C.accent} />
 
         {/* 요약 뱃지 */}
@@ -67,7 +99,7 @@ export function DashboardScreen() {
           </View>
           <View style={[styles.badge, { borderColor: C.green + '55' }]}>
             <Text style={[styles.badgeNum, { color: C.green }]}>{stats.soldCount}</Text>
-            <Text style={styles.badgeLabel}>이달 판매완료</Text>
+            <Text style={styles.badgeLabel}>{month + 1}월 판매완료</Text>
           </View>
         </View>
 
@@ -104,7 +136,30 @@ const styles = StyleSheet.create({
   screen: { flex: 1, paddingHorizontal: 16, paddingTop: 8 },
   dashHeader: { paddingVertical: 20, alignItems: 'center' },
   dashBrand: { color: C.textPri, fontSize: 22, fontWeight: '800', letterSpacing: 0.5 },
-  dashMonth: { color: C.textSec, fontSize: 13, marginTop: 4 },
+  dashMonth: { color: C.textSec, fontSize: 14, fontWeight: '700', minWidth: 110, textAlign: 'center' },
+  monthSelectorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    gap: 16,
+  },
+  arrowBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 2,
+    backgroundColor: C.surface,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: C.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  arrowText: {
+    color: C.accent,
+    fontSize: 20,
+    fontWeight: '800',
+    lineHeight: 22,
+  },
   statCard: {
     backgroundColor: C.surface,
     borderRadius: 20,

@@ -45,9 +45,12 @@ export const todayStr = () => {
   return `${yy}-${mm}-${dd}`;
 };
 
-export const isSameMonth = (dateStr) => {
+export const isSameMonth = (dateStr, year, month) => {
   if (!dateStr) return false;
-  const now = new Date();
   const d = new Date(dateStr);
+  if (year !== undefined && month !== undefined) {
+    return d.getFullYear() === year && d.getMonth() === month;
+  }
+  const now = new Date();
   return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
 };
