@@ -11,6 +11,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import AddItemScreen from '../screens/AddItemScreen';
 import InventoryScreen from '../screens/InventoryScreen';
 import SoldScreen from '../screens/SoldScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -26,6 +27,7 @@ function MainTabNavigator() {
           else if (route.name === 'Add') emoji = '➕';
           else if (route.name === 'Inventory') emoji = '📦';
           else if (route.name === 'Sold') emoji = '🏷️';
+          else if (route.name === 'Settings') emoji = '⚙️';
           return <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{emoji}</Text>;
         },
         tabBarActiveTintColor: C.accent,
@@ -50,6 +52,7 @@ function MainTabNavigator() {
       <Tab.Screen name="Add" component={AddItemScreen} options={{ title: '등록' }} />
       <Tab.Screen name="Inventory" component={InventoryScreen} options={{ title: '재고' }} />
       <Tab.Screen name="Sold" component={SoldScreen} options={{ title: '판매완료' }} />
+      <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: '설정' }} />
     </Tab.Navigator>
   );
 }

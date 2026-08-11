@@ -19,18 +19,18 @@ export const fmtInput = (raw, currency) => {
   return num.toLocaleString('ko-KR');
 };
 
-export const USD_TO_KRW = 1500; // 1 USD = 1,500 KRW (고정 가정값)
+export const USD_TO_KRW = 1500; // 1 USD = 1,500 KRW (기본 폴백값)
 
-export const toKRW = (amount, currency = 'KRW') => {
+export const toKRW = (amount, currency = 'KRW', rate = USD_TO_KRW) => {
   const n = Number(amount) || 0;
-  return currency === 'USD' ? Math.round(n * USD_TO_KRW) : n;
+  return currency === 'USD' ? Math.round(n * rate) : n;
 };
 
-export const calcCostKRW = (item) => {
+export const calcCostKRW = (item, rate = USD_TO_KRW) => {
   if (item.totalCost !== undefined && item.totalCost !== null) {
     return Number(item.totalCost);
   }
-  return toKRW(item.buyPrice, item.buyCurrency || 'KRW') +
+  return toKRW(item.buyPrice, item.buyCurrency || 'KRW', rate) +
     (Number(item.costWash) || 0) +
     (Number(item.costRepair) || 0) +
     (Number(item.costShip) || 0) +

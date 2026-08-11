@@ -32,6 +32,7 @@ const SELL_VIA_OPTIONS = ['번개장터', '후르츠패밀리'];
 
 export function SoldScreen() {
   const items = useItemStore((state) => state.items);
+  const exchangeRate = useItemStore((state) => state.exchangeRate);
   const updateItem = useItemStore((state) => state.updateItem);
   const deleteItem = useItemStore((state) => state.deleteItem);
 
@@ -46,8 +47,8 @@ export function SoldScreen() {
   const [editForm, setEditForm] = useState({});
   const [confirm, setConfirm] = useState(null); // { title, message, onOk }
 
-  const cost = (item) => calcCostKRW(item);
-  const profit = (item) => toKRW(item.soldPrice, item.soldCurrency || 'KRW') - cost(item);
+  const cost = (item) => calcCostKRW(item, exchangeRate);
+  const profit = (item) => toKRW(item.soldPrice, item.soldCurrency || 'KRW', exchangeRate) - cost(item);
 
   const openEdit = (item) => {
     setEditTarget(item);

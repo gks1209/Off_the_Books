@@ -19,7 +19,6 @@ import {
   toKRW,
   todayStr,
   calcCostKRW,
-  USD_TO_KRW,
 } from '../utils/format';
 import { useItemStore } from '../store/useItemStore';
 import Label from '../components/Label';
@@ -35,6 +34,7 @@ const BUY_FROM_OPTIONS = ['번개장터', '후르츠패밀리', 'ebay', '메루�
 
 export function InventoryScreen() {
   const items = useItemStore((state) => state.items);
+  const exchangeRate = useItemStore((state) => state.exchangeRate);
   const updateItem = useItemStore((state) => state.updateItem);
   const deleteItem = useItemStore((state) => state.deleteItem);
 
@@ -55,7 +55,7 @@ export function InventoryScreen() {
     [items]
   );
 
-  const cost = (item) => calcCostKRW(item);
+  const cost = (item) => calcCostKRW(item, exchangeRate);
 
   // ── 판매 모달
   const openSale = (item) => {
@@ -250,7 +250,7 @@ export function InventoryScreen() {
                     <Text style={styles.modalItemCost}>총 원가 (KRW): {fmt(cost(saleTarget))}</Text>
                     {(saleTarget.buyCurrency || 'KRW') === 'USD' && (
                       <Text style={[styles.modalItemCost, { color: C.textMuted, fontSize: 12, marginTop: 2 }]}>
-                        💱 매입가 ${saleTarget.buyPrice} × {USD_TO_KRW.toLocaleString('ko-KR')}원 환산 적용
+                        💱 매입가 ${saleTarget.buyPrice} × {exchangeRate.toLocaleString('ko-KR')}원 환산 적용
                       </Text>
                     )}
                   </View>

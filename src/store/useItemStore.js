@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import NetInfo from '@react-native-community/netinfo';
 import { apiClient } from '../services/api';
 import syncManager from '../utils/syncManager';
+import exchangeRateService from '../services/exchangeRate';
 
 const STORAGE_KEY = '@off_the_books_items_v2';
 
@@ -11,6 +12,7 @@ export const useItemStore = create((set, get) => ({
   items: [],
   ready: false,
   token: null,
+  exchangeRate: 1500, // Dynamic exchange rate state
 
   setReady: (ready) => set({ ready }),
   setToken: (token) => set({ token }),
@@ -25,6 +27,25 @@ export const useItemStore = create((set, get) => ({
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (e) {
       console.warn('Local backup failed', e);
+    }
+  },
+
+  // Exchange Rate Actions
+  loadExchangeRate: async () => {
+    try {
+      const activeRate = await exchangeRateService.getActiveRate();
+      set({ exchangeRate: activeRate });
+    } catch (e) {
+      console.warn('Failed to load active exchange rate', e);
+    }
+  },
+
+  updateExchangeRateSettings: async (manualRate, isManual) => {
+    try {
+      await exchangeRateService.setManualRate(manualRate, isManual);
+      await get().loadExchangeRate();
+    } catch (e) {
+      console.warn('Failed to update exchange rate settings', e);
     }
   },
 
@@ -77,6 +98,9 @@ export const useItemStore = create((set, get) => ({
 
   // Load items from API with AsyncStorage fallback
   loadItems: async () => {
+    // Load the active exchange rate first
+    await get().loadExchangeRate();
+
     // 1. Session Hydration: Check if token exists in SecureStore on startup
     let activeToken = get().token;
     if (!activeToken) {

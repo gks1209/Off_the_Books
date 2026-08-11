@@ -18,8 +18,7 @@ import {
   stripCommas,
   toKRW,
   todayStr,
-  genId,
-  USD_TO_KRW
+  genId
 } from '../utils/format';
 import { useItemStore } from '../store/useItemStore';
 import Label from '../components/Label';
@@ -33,6 +32,7 @@ const BUY_FROM_OPTIONS = ['번개장터', '후르츠패밀리', 'ebay', '메루�
 
 export function AddItemScreen() {
   const addItem = useItemStore((state) => state.addItem);
+  const exchangeRate = useItemStore((state) => state.exchangeRate);
   const navigation = useNavigation();
 
   const blank = {
@@ -58,7 +58,7 @@ export function AddItemScreen() {
     if (!form.name.trim()) { Alert.alert('⚠️', '상품명을 입력해주세요.'); return; }
     if (!form.buyPrice) { Alert.alert('⚠️', '매입가를 입력해주세요.'); return; }
 
-    const buyPriceKRW = toKRW(form.buyPrice, form.buyCurrency);
+    const buyPriceKRW = toKRW(form.buyPrice, form.buyCurrency, exchangeRate);
     const extraCostKRW = (Number(form.costWash) || 0) +
       (Number(form.costRepair) || 0) +
       (Number(form.costShip) || 0) +
@@ -79,7 +79,7 @@ export function AddItemScreen() {
     Alert.alert('✅', `"${form.name}" 등록 완료!`);
   };
 
-  const buyPriceKRW = toKRW(form.buyPrice, form.buyCurrency);
+  const buyPriceKRW = toKRW(form.buyPrice, form.buyCurrency, exchangeRate);
   const extraCostKRW = (Number(form.costWash) || 0) +
     (Number(form.costRepair) || 0) +
     (Number(form.costShip) || 0) +
@@ -121,7 +121,7 @@ export function AddItemScreen() {
                 <Text style={styles.exchangeNoticeText}>
                   💱 ${buyPriceNum.toLocaleString('en-US')} → {fmt(buyPriceKRW)} 시세 적용
                 </Text>
-                <Text style={styles.exchangeNoticeHint}>가정 환율: $1 = {USD_TO_KRW.toLocaleString('ko-KR')}원</Text>
+                <Text style={styles.exchangeNoticeHint}>가정 환율: $1 = {exchangeRate.toLocaleString('ko-KR')}원</Text>
               </View>
             )}
             <CategoryPicker value={form.category} onChange={(v) => set('category', v)} />

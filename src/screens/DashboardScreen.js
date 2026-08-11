@@ -12,21 +12,22 @@ import { useItemStore } from '../store/useItemStore';
 
 export function DashboardScreen() {
   const items = useItemStore((state) => state.items);
+  const exchangeRate = useItemStore((state) => state.exchangeRate);
 
   const stats = useMemo(() => {
     const soldThisMonth = items.filter(
       (i) => i.status === 'sold' && isSameMonth(i.soldDate)
     );
     const totalRevenue = soldThisMonth.reduce(
-      (a, i) => a + toKRW(i.soldPrice, i.soldCurrency || 'KRW'), 0
+      (a, i) => a + toKRW(i.soldPrice, i.soldCurrency || 'KRW', exchangeRate), 0
     );
-    const totalCost = soldThisMonth.reduce((a, i) => a + calcCostKRW(i), 0);
+    const totalCost = soldThisMonth.reduce((a, i) => a + calcCostKRW(i, exchangeRate), 0);
     const netProfit = totalRevenue - totalCost;
 
     const unsold = items.filter((i) => i.status === 'selling');
-    const inventoryValue = unsold.reduce((a, i) => a + calcCostKRW(i), 0);
+    const inventoryValue = unsold.reduce((a, i) => a + calcCostKRW(i, exchangeRate), 0);
     return { totalRevenue, netProfit, inventoryValue, unsoldCount: unsold.length, soldCount: soldThisMonth.length };
-  }, [items]);
+  }, [items, exchangeRate]);
 
   const now = new Date();
   const monthLabel = `${now.getFullYear()}년 ${now.getMonth() + 1}월`;
