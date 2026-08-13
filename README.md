@@ -258,16 +258,46 @@ PostgreSQL 데이터베이스가 준비되어 있어야 합니다.
 
 ## 📸 Screenshots
 
-> 아래 화면 캡처본을 `img/` 폴더에 추가하면 이 섹션에 삽입할 예정입니다.
+#### 로그인 / 회원가입
+<table>
+<tr>
+<td><img src="img/auth1.png" width="350"/></td>
+<td><img src="img/auth2.png" width="350"/></td>
+</tr>
+</table>
 
-| 파일명 | 화면 |
-| :--- | :--- |
-| `img/auth.png` | 로그인 / 회원가입 화면 |
-| `img/dashboard.png` | 대시보드 (이번 달 매출·순이익 요약) |
-| `img/add-item.png` | 상품 등록 화면 |
-| `img/inventory.png` | 재고 목록 (아코디언 상세 뷰) |
-| `img/sold.png` | 판매 완료 처리 및 배송지 입력 |
-| `img/settings.png` | 환율 설정 화면 |
+#### 대시보드 (월별 매출·순이익 리포트)
+<img src="img/dashboard.png" width="700"/>
+
+#### 상품 등록
+<table>
+<tr>
+<td><img src="img/add-item1.png" width="350"/></td>
+<td><img src="img/add-item2.png" width="350"/></td>
+</tr>
+</table>
+
+#### 재고 목록 (아코디언 상세 · 액션 버튼)
+<img src="img/inventory.png" width="700"/>
+
+#### 판매 완료 처리
+<table>
+<tr>
+<td><img src="img/sold1.png" width="350"/></td>
+<td><img src="img/sold2.png" width="350"/></td>
+</tr>
+</table>
+
+#### 판매 완료 목록 / 수익 분석
+<table>
+<tr>
+<td><img src="img/sold3.png" width="350"/></td>
+<td><img src="img/sold4.png" width="350"/></td>
+</tr>
+</table>
+
+#### 설정 (실시간 환율)
+<img src="img/settings.png" width="700"/>
 
 ---
 
