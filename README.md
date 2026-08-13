@@ -11,6 +11,8 @@
 
 이 프로젝트는 **React Native (Expo) + React Navigation** 기반의 모바일 프론트엔드와 **Node.js (Express) + PostgreSQL** 기반의 백엔드 서버로 구성되어 있습니다. 사용자별 데이터가 **JWT 인증**으로 격리되며, 오프라인 상태에서 발생한 변경 사항은 **동기화 큐**에 쌓였다가 재연결 시 자동으로 서버에 반영됩니다.
 
+> 실제 사용 중인 사이드 프로젝트로 스토어 공개 배포 전 단계입니다. 실행 화면은 아래 [Screenshots](#-screenshots)의 데모 GIF를 참고해주세요.
+
 ---
 
 ## 👤 My Role
@@ -257,6 +259,8 @@ PostgreSQL 데이터베이스가 준비되어 있어야 합니다.
 ---
 
 ## 📸 Screenshots
+
+<img src="img/demo.gif" width="450" alt="Off the Books 사용 흐름 데모" />
 
 #### 로그인 / 회원가입
 <table>
