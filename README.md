@@ -1,8 +1,29 @@
 # 📖 Off the Books (빈티지숍 장부 및 재고 관리 시스템)
 
-**Off the Books**는 빈티지숍 운영자들을 위한 모바일 장부 및 재고 관리 애플리케이션입니다. 매입 정보(원가, 세탁비, 수선비, 관세 등)와 판매 정보(판매가, 판매처, 배송지 등)를 체계적으로 기록하고 월별 매출, 순이익 및 현재 보유 재고의 가치를 한눈에 파악할 수 있도록 돕습니다.
+![React Native](https://img.shields.io/badge/React_Native-20232A?style=flat-square&logo=react&logoColor=61DAFB)
+![Expo](https://img.shields.io/badge/Expo-000020?style=flat-square&logo=expo&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=flat-square&logo=jsonwebtokens&logoColor=white)
+
+빈티지숍 운영자가 매입 원가·판매 기록·재고 가치를 앱에서 흩어짐 없이 관리할 수 있도록 만든 모바일 장부 애플리케이션입니다. 매입 정보(원가, 세탁비, 수선비, 관세 등)와 판매 정보(판매가, 판매처, 배송지 등)를 체계적으로 기록하고, 월별 매출·순이익·보유 재고 가치를 한눈에 파악할 수 있습니다.
 
 이 프로젝트는 **React Native (Expo) + React Navigation** 기반의 모바일 프론트엔드와 **Node.js (Express) + PostgreSQL** 기반의 백엔드 서버로 구성되어 있습니다. 사용자별 데이터가 **JWT 인증**으로 격리되며, 오프라인 상태에서 발생한 변경 사항은 **동기화 큐**에 쌓였다가 재연결 시 자동으로 서버에 반영됩니다.
+
+---
+
+## 👤 My Role
+
+**개인 사이드 프로젝트로 기획부터 프론트엔드/백엔드/배포까지 전 과정을 단독으로 설계·구현**했습니다.
+
+- React Native(Expo) + Node/Express 풀스택 구조를 처음부터 설계하고, 화면 단위 컴포넌트 분리(`src/screens`, `src/components`, `src/store`)로 리팩토링
+- 단일 사용자 구조였던 기존 스키마를 **JWT 기반 멀티테넌트(userId 격리) 구조로 전환** — 기존 운영 데이터의 무중단 이관을 위한 `migrate.js` 마이그레이션 스크립트 직접 작성
+- 네트워크 상태 감지(NetInfo) 기반 **오프라인 동기화 큐**를 설계 — 동일 항목에 대한 CREATE/DELETE 상쇄, 연속 UPDATE 병합, 재연결 시 FIFO Replay 로직 구현
+- 외부 환율 API 연동 + 24시간 캐싱 + 수동 오버라이드 폴백 체계를 구현해 API 호출 비용과 오프라인 안정성을 동시에 확보
+- Render(API) + Supabase(PostgreSQL) 배포 파이프라인을 구성하고, 배포 환경의 IPv6 전용 네트워크와 호스팅 플랫폼의 IPv4 아웃바운드 제약 간 비호환 문제를 진단 후 해결
+- EAS Update 기반 OTA 배포 체계를 구축하고 `runtimeVersion: fingerprint` 정책 적용으로 네이티브 비호환 업데이트 오배포 방지
+- Jest + Supertest로 인증 라우트 테스트 작성
 
 ---
 
@@ -54,24 +75,39 @@
 
 ## 🛠 기술 스택
 
-### Frontend
-- **Framework**: [React Native](https://reactnative.dev/) 0.85 + [Expo](https://expo.dev/) SDK 56 (EAS Build / Update 지원)
-- **Navigation**: [React Navigation](https://reactnavigation.org/) (Native Stack + Bottom Tabs, 로그인 여부에 따른 Auth/Main 이중 스택 구조)
-- **State Management**: [Zustand](https://github.com/pmndrs/zustand) — 단일 전역 스토어(`useItemStore`)로 아이템/인증/환율 상태를 관리
-- **Secure Storage**: [expo-secure-store](https://docs.expo.dev/versions/latest/sdk/securestore/) (JWT 보관), [@react-native-async-storage/async-storage](https://react-native-directory.netlify.app/?search=async-storage) (오프라인 캐시·동기화 큐)
-- **Network**: [@react-native-community/netinfo](https://github.com/react-native-netinfo/react-native-netinfo)
-- **UI Components**: 재사용 가능한 커스텀 컴포넌트 (Sleek Dark Theme 적용)
+| Area | Stack |
+| :--- | :--- |
+| **Frontend** | [React Native](https://reactnative.dev/) 0.85, [Expo](https://expo.dev/) SDK 56, [React Navigation](https://reactnavigation.org/)(Native Stack + Bottom Tabs) |
+| **State Management** | [Zustand](https://github.com/pmndrs/zustand) — 단일 전역 스토어(`useItemStore`)로 아이템/인증/환율 상태 관리 |
+| **Local Storage** | [expo-secure-store](https://docs.expo.dev/versions/latest/sdk/securestore/)(JWT 보관), [AsyncStorage](https://react-native-directory.netlify.app/?search=async-storage)(오프라인 캐시·동기화 큐) |
+| **Networking** | [@react-native-community/netinfo](https://github.com/react-native-netinfo/react-native-netinfo)(온/오프라인 감지), Fetch 기반 공통 API 클라이언트 |
+| **Backend** | [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/) (Router / Controller / Middleware 구조) |
+| **Auth** | [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)(JWT 발급/검증), [bcryptjs](https://www.npmjs.com/package/bcryptjs)(비밀번호 해싱) |
+| **Database** | [PostgreSQL](https://www.postgresql.org/) via [node-postgres (pg)](https://node-postgres.com/), 배포는 [Supabase](https://supabase.com/) |
+| **Testing** | [Jest](https://jestjs.io/) + [Supertest](https://www.npmjs.com/package/supertest) (인증 라우트 유닛 테스트) |
+| **Deployment** | API — [Render](https://render.com/) / App — [EAS Build & Update](https://docs.expo.dev/eas/) |
 
-### Backend
-- **Runtime**: [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/) (Router / Controller / Middleware 구조)
-- **Auth**: [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) (JWT 발급/검증), [bcryptjs](https://www.npmjs.com/package/bcryptjs) (비밀번호 해싱)
-- **Database Driver**: [node-postgres (pg)](https://node-postgres.com/)
-- **Testing**: [Jest](https://jestjs.io/) + [Supertest](https://www.npmjs.com/package/supertest) (인증 라우트 유닛 테스트)
-- **Utility**: Cors, Dotenv, Nodemon
+---
 
-### Database
-- **DBMS**: [PostgreSQL](https://www.postgresql.org/)
-- **Deployment Support**: Local DB 또는 Cloud DB (Neon, Supabase 등) 대응 (SSL 연결 지원 및 IPv6 미지원 환경을 위한 IPv4 강제 설정 포함)
+## 🏗 Architecture
+
+```
+┌──────────────────────┐        HTTPS (JWT Bearer)        ┌───────────────────────┐        node-postgres        ┌────────────────┐
+│  React Native (Expo)  │ ───────────────────────────────▶ │  Express REST API      │ ───────────────────────────▶ │  PostgreSQL     │
+│  - Zustand store       │ ◀─────────────────────────────── │  (Render)              │ ◀─────────────────────────── │  (Supabase)     │
+│  - SecureStore(JWT)     │                                  └───────────────────────┘                              └────────────────┘
+└──────────┬────────────┘
+           │ 오프라인 또는 요청 실패 시
+           ▼
+┌──────────────────────┐
+│  Sync Queue           │  CREATE/UPDATE/DELETE를 로컬에 적재 (상쇄·병합 최적화)
+│  (AsyncStorage)        │  → 네트워크 재연결 시 FIFO로 순차 Replay
+└──────────────────────┘
+```
+
+- 클라이언트는 로그인 시 발급받은 JWT를 `expo-secure-store`에 저장하고, 모든 `/api/items/*` 요청에 `Authorization: Bearer` 헤더로 첨부합니다.
+- 서버는 `authMiddleware`에서 JWT를 검증해 요청자의 `userId`를 추출하고, 모든 CRUD 쿼리를 해당 사용자 소유 데이터로 한정합니다.
+- 네트워크 요청이 실패하면(오프라인 포함) 즉시 로컬 Sync Queue에 적재되고, `AsyncStorage`에 백업된 최신 재고 목록으로 화면을 유지합니다. 재연결이 감지되면 큐를 FIFO 순서로 재생하며, 중간 실패 시 그 지점부터 이어서 재시도합니다.
 
 ---
 
@@ -204,3 +240,43 @@ PostgreSQL 데이터베이스가 준비되어 있어야 합니다.
 - **JS 전용 변경**(화면 로직, 스타일, API 호출 등)은 `eas update`로 즉시 OTA 배포가 가능합니다.
 - **네이티브 모듈이 추가/변경**될 때는 `eas build --profile production`으로 새 바이너리를 빌드해야 하며, 이 경우 스토어 재배포 또는 기기 재설치가 필요합니다.
 - `app.json`의 `runtimeVersion.policy`가 `fingerprint`로 설정되어 있어, 네이티브 런타임에 영향을 주는 변경이 생기면 자동으로 런타임 버전이 갱신되어 구버전 바이너리에 호환되지 않는 업데이트가 배포되는 사고를 방지합니다.
+
+---
+
+## 🧩 Key Challenges & Troubleshooting
+
+**1. Render(IPv4 전용 아웃바운드) ↔ Supabase(IPv6 전용 Direct Connection) 네트워크 비호환**
+배포 후 서버 로그에 `ENETUNREACH`와 함께 IPv6 주소가 찍히며 DB 연결이 계속 실패했습니다. 원인을 추적한 결과 Supabase의 Direct Connection 호스트가 IPv6 주소만 반환하는데, Render의 아웃바운드 네트워크는 IPv6 라우팅을 지원하지 않아 발생한 문제였습니다. `dns.setDefaultResultOrder('ipv4first')`나 `pg.Pool`의 `family: 4` 옵션은 애초에 IPv4 레코드가 없으면 무력하다는 것을 확인하고, Supabase의 **Session Pooler(Supavisor)** 연결 문자열로 전환해 IPv4 경로를 확보하는 방식으로 해결했습니다.
+
+**2. 오프라인 우선(Offline-first) 동기화 큐 설계**
+매장에서 네트워크가 불안정한 상황에서도 매입/판매 기록이 끊기지 않아야 한다는 요구가 있어, `@react-native-community/netinfo`로 네트워크 상태를 감지하고 실패한 요청을 로컬 큐에 순서대로 적재하는 구조를 설계했습니다. 단순 적재만으로는 같은 항목에 대한 중복 요청이 쌓이는 문제가 있어, 같은 항목의 `CREATE` 후 `DELETE`는 서로 상쇄하고 연속된 `UPDATE`는 페이로드를 병합하는 로직을 추가해 재연결 시 불필요한 API 호출을 줄였습니다.
+
+**3. 단일 사용자 구조 → JWT 기반 멀티테넌트 전환**
+초기 버전은 사용자 구분 없이 `items` 테이블 하나만 사용하는 구조였습니다. 여러 사용자가 각자의 재고를 독립적으로 관리할 수 있도록 `users` 테이블과 JWT 인증을 도입하면서, 이미 쌓여 있던 운영 데이터를 안전하게 이관해야 했습니다. 이를 위해 기본 관리자 계정을 생성하고 기존 `items` 행 전체에 해당 `userId`를 일괄 배정한 뒤 `NOT NULL` 제약을 거는 `migrate.js` 스크립트를 작성해, 다운타임 없이 스키마를 전환했습니다.
+
+---
+
+## 📸 Screenshots
+
+> 아래 화면 캡처본을 `img/` 폴더에 추가하면 이 섹션에 삽입할 예정입니다.
+
+| 파일명 | 화면 |
+| :--- | :--- |
+| `img/auth.png` | 로그인 / 회원가입 화면 |
+| `img/dashboard.png` | 대시보드 (이번 달 매출·순이익 요약) |
+| `img/add-item.png` | 상품 등록 화면 |
+| `img/inventory.png` | 재고 목록 (아코디언 상세 뷰) |
+| `img/sold.png` | 판매 완료 처리 및 배송지 입력 |
+| `img/settings.png` | 환율 설정 화면 |
+
+---
+
+## 📬 Contact
+
+- Email: [gks12090607@gmail.com](mailto:gks12090607@gmail.com)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see [LICENSE](./LICENSE) for details.
