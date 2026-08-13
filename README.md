@@ -305,6 +305,14 @@ PostgreSQL 데이터베이스가 준비되어 있어야 합니다.
 
 ---
 
+## 🔧 Development Process
+
+- **커밋 컨벤션**: 초기에는 타임스탬프 기반 메시지로 커밋하다가, 프로젝트가 커지면서 `feat`, `fix`, `docs`, `refactor` 등 Conventional Commits 스타일로 전환해 변경 이력을 구조화했습니다.
+- **테스트**: 인증 라우트에 대해 Jest + Supertest 기반 유닛 테스트를 작성했습니다.
+- **개발 방식**: 1인 개발로 별도 브랜치 전략 없이 `master` 브랜치에 직접 커밋하는 방식으로 진행했습니다.
+
+---
+
 ## 📬 Contact
 
 - Email: [gks12090607@gmail.com](mailto:gks12090607@gmail.com)
