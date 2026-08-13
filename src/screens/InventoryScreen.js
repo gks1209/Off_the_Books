@@ -181,34 +181,34 @@ export function InventoryScreen() {
 
             <View style={styles.soldActionRow}>
               <TouchableOpacity
-                style={[styles.soldActionBtn, { borderColor: item.isReceived ? C.gold + '80' : C.blue + '80', backgroundColor: item.isReceived ? C.gold + '15' : C.blue + '15', flex: 1.5 }]}
+                style={[styles.soldActionBtn, { borderColor: item.isReceived ? C.gold + '80' : C.blue + '80', backgroundColor: item.isReceived ? C.gold + '15' : C.blue + '15' }]}
                 onPress={() => handleToggleReceived(item)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.soldActionBtnText, { color: item.isReceived ? C.gold : C.blue }]}>
+                <Text style={[styles.soldActionBtnText, { color: item.isReceived ? C.gold : C.blue }]} numberOfLines={1} adjustsFontSizeToFit>
                   {item.isReceived ? '⏳ 수령 대기로 변경' : '📦 수령 완료 처리'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.soldActionBtn, { borderColor: C.green + '80', backgroundColor: C.green + '15', flex: 1.5 }]}
+                style={[styles.soldActionBtn, { borderColor: C.green + '80', backgroundColor: C.green + '15' }]}
                 onPress={() => openSale(item)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.soldActionBtnText, { color: C.green }]}>💰 판매 완료 처리</Text>
+                <Text style={[styles.soldActionBtnText, { color: C.green }]} numberOfLines={1} adjustsFontSizeToFit>💰 판매 완료 처리</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.soldActionBtn, { borderColor: C.accent + '80', backgroundColor: C.accent + '15', flex: 1 }]}
+                style={[styles.soldActionBtn, { borderColor: C.accent + '80', backgroundColor: C.accent + '15' }]}
                 onPress={() => openEdit(item)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.soldActionBtnText, { color: C.accent }]}>✏️ 수정</Text>
+                <Text style={[styles.soldActionBtnText, { color: C.accent }]} numberOfLines={1}>✏️ 수정</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.soldActionBtn, { borderColor: C.red + '80', backgroundColor: C.red + '15', flex: 1 }]}
+                style={[styles.soldActionBtn, { borderColor: C.red + '80', backgroundColor: C.red + '15' }]}
                 onPress={() => handleDelete(item)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.soldActionBtnText, { color: C.red }]}>🗑 삭제</Text>
+                <Text style={[styles.soldActionBtnText, { color: C.red }]} numberOfLines={1}>🗑 삭제</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -456,6 +456,7 @@ const styles = StyleSheet.create({
   expandedTitle: { color: C.accent, fontSize: 12, fontWeight: '700', letterSpacing: 0.5, marginBottom: 8 },
   soldActionRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginTop: 14,
     paddingTop: 12,
@@ -463,11 +464,14 @@ const styles = StyleSheet.create({
     borderTopColor: C.border,
   },
   soldActionBtn: {
-    flex: 1,
-    paddingVertical: 9,
+    flexBasis: '48%',
+    flexGrow: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 6,
     borderRadius: 10,
     borderWidth: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   soldActionBtnText: {
     fontSize: 12,
